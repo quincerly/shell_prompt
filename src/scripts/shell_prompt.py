@@ -164,7 +164,7 @@ def prompt(cfg):
     apptainer_bgcol='dark_goldenrod' if fancy_colour else 'yellow'
     userhost_bgcol='orchid' if fancy_colour else 'magenta'
     git_bgcol='light_sky_blue_1' if fancy_colour else 'cyan'
-    cwd_bgcol='dark_olive_green_3b' if fancy_colour else 'green'
+    cwd_bgcol='dark_sea_green_4b' if fancy_colour else 'green'
     clock_bgcol='light_goldenrod_1' if fancy_colour else 'yellow'
 
     # Build cwd text for prompt
