@@ -203,7 +203,7 @@ def prompt(cfg):
         container_bar_txt=sym.container+" Apptainer "+os.path.split(os.environ["APPTAINER_CONTAINER"])[1]
         container_bar_tmp=bar(container_bar_txt, apptainer_bgcol)
         cpad=columns-vis_length(container_bar_tmp)
-        container_bar=[bar(" "*round(0.5*cpad)+container_bar_txt+" "*(cpad-round(0.5*cpad)), apptainer_bgcol)]
+        container_bar=[bar(" "*round(0.5*cpad)+container_bar_txt+" "*(cpad-round(0.5*cpad)), apptainer_bgcol)]+["\n"]
         containertextwtitle="[A] "
     else:
         container_bar=[]
@@ -233,11 +233,7 @@ def prompt(cfg):
     window_title_set_string="\033]0;"+window_title+"\007"
 
     #return window_title_set_string+"".join(bars)+"\n"+"".join(container_bar)+"$ "
-    return window_title_set_string+"".join(
-        container_bar+["\n"]+
-        bars+["\n"]+
-        ["$ "]
-    )
+    return window_title_set_string+"".join(container_bar+bars+["\n"]+["$ "])
 
 def main_cli():
     cfgfilepath=os.path.join(os.environ['HOME'], '.config', 'shell_prompt.conf')
