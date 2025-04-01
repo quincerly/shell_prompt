@@ -9,7 +9,7 @@ import threading
 import json
 
 try:
-    import colored33
+    import colored
     from colored import stylize
     fancy_colour=True
 except:
