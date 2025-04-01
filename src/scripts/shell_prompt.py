@@ -9,7 +9,7 @@ import threading
 import json
 
 try:
-    import colored
+    import colored33
     from colored import stylize
     fancy_colour=True
 except:
@@ -234,7 +234,7 @@ def prompt(cfg):
     #return window_title_set_string+"".join(container_bar+bars)+"\n$"
     return window_title_set_string+"".join(bars)+"\n"+"".join(container_bar)+"$ "
 
-if __name__ == "__main__":
+def main_cli():
     cfgfilepath=os.path.join(os.environ['HOME'], '.config', 'shell_prompt.conf')
     if os.path.exists(cfgfilepath):
         with open(cfgfilepath, 'r') as cfgfile:

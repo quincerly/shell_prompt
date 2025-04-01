@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name='shell_prompt'
+version='1.0.0'
+description='Fancy shell prompt to run from PS1'
+authors= [ { name = "Dan Rolfe", email = 'git@rolfe.email' } ]
+dependencies=[
+    "termcolor",
+]
+
+[project.scripts]
+shell_prompt = 'scripts.shell_prompt:main_cli'
+
+[project.urls]
+"Homepage" = 'https://github.com/quincerly/shell_prompt'
