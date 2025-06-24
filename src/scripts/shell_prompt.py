@@ -150,8 +150,12 @@ def prompt(cfg):
     def interpolate(path):
         return path.replace("{USER}", os.environ['USER'])
 
+    VENV_PROMPT=os.environ.get('VIRTUAL_ENV_PROMPT', '')
+
+    rows, columns = list(map(int, os.popen('stty size', 'r').read().split())) # Get terminal dimensions
+    columns-=len(VENV_PROMPT) # Remove length of any Python venv prompt
+
     user=os.environ['USER']
-    rows, columns = list(map(int, os.popen('stty size', 'r').read().split()))
     cwd=os.getcwd()
     git_branch=os.popen('git rev-parse --abbrev-ref HEAD', 'r').read().strip() if os.system('git rev-parse 2> /dev/null > /dev/null')==0 else None
     job_info=simple_job_queue_info()
