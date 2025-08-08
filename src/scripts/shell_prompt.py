@@ -36,7 +36,7 @@ class Icons:
             self.semi_right='\ue0b4'.encode('utf-8').decode()
             self.tri_left='\ue0b2'.encode('utf-8').decode()
             self.tri_right='\ue0b0'.encode('utf-8').decode()
-            self.watch='\uf49b'.encode('utf-8').decode()
+            self.clock='⏲'.encode('utf-8').decode()
             self.lego='\ue0d1'.encode('utf-8').decode()
             self.house_outline='\uf46d'.encode('utf-8').decode()
             self.house_solid='\uf015'.encode('utf-8').decode()
@@ -68,7 +68,7 @@ class Icons:
             self.semi_right=""
             self.tri_left=""
             self.tri_right=""
-            self.watch=""
+            self.clock=""
             self.lego=""
             self.house_outline=""
             self.house_solid=""
@@ -214,7 +214,7 @@ def prompt(cfg):
         containertextwtitle=""
 
     userhostbar=[bar(user+"@"+host, userhost_bgcol)]
-    clockbar=[bar(sym.watch+" "+time.strftime("%H:%M:%S", time.localtime()), clock_bgcol)]
+    clockbar=[bar(sym.clock+" "+time.strftime("%H:%M:%S", time.localtime()), clock_bgcol)]
     cwdbar=[bar(cwdtext, cwd_bgcol)]
 
     #bars=container_bar+userhostbar+gitbar+cwdbar+jobbar+clockbar
