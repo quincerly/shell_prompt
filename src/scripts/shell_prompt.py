@@ -10,6 +10,7 @@ import json
 
 try:
     import colored
+    colored.set_tty_aware(False)
     from colored import stylize
     fancy_colour=True
 except:
