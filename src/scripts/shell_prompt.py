@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import time
 import os
@@ -10,6 +10,7 @@ import json
 
 try:
     import colored
+    colored.set_tty_aware(False)
     from colored import stylize
     fancy_colour=True
 except:
