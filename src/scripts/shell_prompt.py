@@ -7,6 +7,8 @@ import traceback
 import sys
 import threading
 import json
+import locale
+import pwd
 
 try:
     import colored
@@ -17,6 +19,10 @@ except:
     from termcolor import colored
     fancy_colour=False
 
+def encode_prompt_escapes(s):
+    # Wrap all ANSI escape sequences in \x01...\x02
+    return re.sub(r'(\x1b\[[0-9;]*m)', lambda m: '\x01' + m.group(1) + '\x02', s)
+
 """Get git status string or return None if it takes more than timeout sec"""
 def get_git_status(timeout=2.0):
     def _get_git_status(results):
@@ -26,6 +32,38 @@ def get_git_status(timeout=2.0):
     gd.start()
     gd.join(timeout=timeout)
     return results[0]
+
+def terminal_supports_unicode():
+    # Most reliable: what encoding will stdout actually use?
+    encoding = sys.stdout.encoding or ''
+    if 'utf' in encoding.lower():
+        return True
+    
+    # Fallback: check locale environment variables
+    for var in ('LC_ALL', 'LC_CTYPE', 'LANG'):
+        val = os.environ.get(var, '').lower()
+        if 'utf' in val:
+            return True
+    
+    # Fallback: ask locale module directly
+    try:
+        loc = locale.getpreferredencoding(False).lower()
+        if 'utf' in loc:
+            return True
+    except Exception:
+        pass
+    
+    return False
+
+def get_username():
+    # Most robust: look up the actual uid in the password database
+    try:
+        return pwd.getpwuid(os.getuid()).pw_name
+    except Exception:
+        pass
+    
+    # Fallback: environment variables (may be absent in PS1 subshell)
+    return os.environ.get('USER') or os.environ.get('LOGNAME') or 'unknown'
 
 class Icons:
     def __init__(self, use_unicode):
@@ -99,7 +137,8 @@ def prompt(cfg):
     bookmarks=cfg['bookmarks']
     servers=cfg['servers']
 
-    use_unicode=(not os.environ['TERM'] in ['linux', 'xterm'] or 'ROXTERM_NUM' in os.environ) and "PROMPT_NO_UNICODE" not in os.environ
+    in_apptainer="APPTAINER_CONTAINER" in os.environ
+    use_unicode=terminal_supports_unicode()
     host=os.popen('hostname', 'r').read().strip()
 
     sym=Icons(use_unicode)
@@ -149,14 +188,14 @@ def prompt(cfg):
     def server_replace_noicons(path, old, new):
         return replace_start(path, old, new, symtext.dataserver2+symtext.chev_left, symtext.chev_right)
     def interpolate(path):
-        return path.replace("{USER}", os.environ['USER'])
+        return path.replace("{USER}", get_username())
 
     VENV_PROMPT=os.environ.get('VIRTUAL_ENV_PROMPT', '')
 
     rows, columns = list(map(int, os.popen('stty size', 'r').read().split())) # Get terminal dimensions
     columns-=len(VENV_PROMPT) # Remove length of any Python venv prompt
 
-    user=os.environ['USER']
+    user=get_username()
     cwd=os.getcwd()
     git_branch=os.popen('git rev-parse --abbrev-ref HEAD', 'r').read().strip() if os.system('git rev-parse 2> /dev/null > /dev/null')==0 else None
     job_info=simple_job_queue_info()
@@ -204,7 +243,7 @@ def prompt(cfg):
     else:
         jobbar=[]
 
-    if "APPTAINER_CONTAINER" in os.environ:
+    if in_apptainer:
         container_bar_txt=sym.container+" Apptainer "+os.path.split(os.environ["APPTAINER_CONTAINER"])[1]
         container_bar_tmp=bar(container_bar_txt, apptainer_bgcol)
         cpad=columns-vis_length(container_bar_tmp)
@@ -237,8 +276,12 @@ def prompt(cfg):
     window_title=containertextwtitle+cwdtextwtitle
     window_title_set_string="\033]0;"+window_title+"\007"
 
-    #return window_title_set_string+"".join(bars)+"\n"+"".join(container_bar)+"$ "
-    return window_title_set_string+"".join(container_bar+bars+["\n"]+["$ "])
+    if in_apptainer:
+        result=window_title_set_string+encode_prompt_escapes("".join(container_bar+bars+["\n"]+["$ "]))
+    else:
+        # return window_title_set_string+"".join(bars)+"\n"+"".join(container_bar)+"$ "
+        result=window_title_set_string+"".join(container_bar+bars+["\n"]+["$ "])
+    return result
 
 def main_cli():
     cfgfilepath=os.path.join(os.environ['HOME'], '.config', 'shell_prompt.conf')
@@ -253,6 +296,8 @@ def main_cli():
         print(p)
     except Exception as err:
         print("--- Prompt error -------------------------------------")
+        print("ENV:\n   "+"\n   ".join(sorted(os.environ.keys())))
+        print("-------------------------------------------------------")
         traceback.print_exc(file=sys.stdout)
         print("-------------------------------------------------------")
         print("$ ")
